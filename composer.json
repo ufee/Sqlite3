@@ -1,5 +1,5 @@
 {
-    "name": "ufee/Sqlite3",
+    "name": "ufee/sqlite3",
     "homepage": "https://github.com/ufee",
     "description": "Sqlite3 PHP Class (https://www.sqlite.org/)",
     "type": "library",
