@@ -32,19 +32,27 @@ $table = $db->table(string $name);
 $insert = $table->insert(array $columns);
 
 \Ufee\Sqlite3\Query\Select;
-$select = $table->insert(array $columns);
+$select = $table->select(array $columns);
 
 \Ufee\Sqlite3\Query\Update;
-$update = $table->insert(array $columns);
+$update = $table->update(array $columns);
 
 \Ufee\Sqlite3\Query\Delete;
-$delete = $table->insert();
+$delete = $table->delete();
 ```
 Объект Коллекция Запросов
 ```php
 \Ufee\Sqlite3\Queries;
 $queries = $db->queries();
 $queries = $table->queries();
+```
+Отладка запросов 
+```php
+$db->queries()->listen(function($data) {
+	echo 'Table: '.$data['table']."\n";
+	echo '  Sql: '.$data['sql']."\n";
+	echo ' Time: '.$data['time']."\n";
+});
 ```
 
 ## Работа с классом
@@ -62,6 +70,11 @@ $db = Sqlite::database(':memory:');
 if (!$db->exists()) {
 	$db->create();
 }
+```
+Открытие соединения с БД  
+На практике не требуется, выполняется автоматически
+```php
+$db->open();
 ```
 Выполнение произвольных запросов и команд
 ```php
@@ -112,34 +125,26 @@ $culumns = $table->columns($name = null);
 ```
 Задать свой тип данных столбца для последующих запросов
 ```php
-$table->setColumnType(string $name, string $type); 
-// integer, real, text, blob, null
-$table->setColumnType('amount', 'integer');
-$table->setColumnType('data', 'text');
+$table->setColumnType(string $name, string $type); // integer, real, text, blob, null
+$table->setColumnType('category', 'integer');
+$table->setColumnType('title', 'text');
 ```
 Удаление таблицы
 ```php
 $table->drop();
 ```
-Отладка запросов 
-```php
-$db->queries()->listen(function($data) {
-	echo 'Table: '.$data['table']."\n";
-	echo '  Sql: '.$data['sql']."\n";
-	echo ' Time: '.$data['time']."\n";
-});
-```
-Запросы выполняются с использованием подготовленных выражений (автоматически)
 
-Операторы условий: [=|>|<|<=|>=|!=|BETWEEN|NOT BETWEEN|IN|NOT IN|LIKE|NOT LIKE|GLOB|NOT GLOB]
-
-Для нихеописанных примеров создадим бд и таблицы:
+ ## Примеры запросов
+Запросы выполняются с использованием подготовленных выражений (автоматически).  
+Операторы условий: [=|>|<|<=|>=|!=|BETWEEN|NOT BETWEEN|IN|NOT IN|LIKE|NOT LIKE|GLOB|NOT GLOB]  
+Для нижеописанных примеров создаем БД и таблицы:
 ```php
 $db = \Ufee\Sqlite3\Sqlite::database(
 	tempnam(sys_get_temp_dir(), 'Sqlite3')
 );
 $goods = $db->table('goods');
 $meta = $db->table('goods_meta');
+
 if (!$goods->exists()) {
 	$goods->create([
 		'id' => 'INTEGER PRIMARY KEY', 
@@ -207,7 +212,7 @@ $meta->insert([
 	'descr' => 'Professional device',
 	'star' => 3
 ]);
-INSERT INTO goods_meta (good_id, descr, star) VALUES (..., ..., ..., ....)
+// INSERT INTO goods_meta (good_id, descr, star) VALUES (..., ..., ..., ....)
 
 ```
 Вставка нескольких строк
@@ -218,7 +223,7 @@ $result = $insert->rows([
 	[4, 'TV 2000'],
 	[4, 'TV 3000']
 ]);
-INSERT INTO goods (category, title) VALUES (..., ...), (..., ...), (..., ...)
+// INSERT INTO goods (category, title) VALUES (..., ...), (..., ...), (..., ...)
 ```
 
 ## Запрос Select
@@ -260,7 +265,7 @@ $count = $select->count();
 $rows = $select->rows(3);
 // SELECT * FROM goods WHERE id > ... ORDER BY hot DESC LIMIT 3
 
-$select = $goods->select(('id, category, title')
+$select = $goods->select('id, category, title')
 	->where('hot', null, 'IS NOT')
 	->orderBy('hot');
 $rows = $select->rows(2,2);
@@ -348,11 +353,11 @@ $result = $delete->row();
 $delete = $goods->delete()
 	->where('category', 4)
 	->orderBy('id');
-$deleted_part = $delete->rows(3);
+$delete->rows(3);
 // DELETE FROM goods WHERE category = ... ORDER BY id DESC LIMIT 3
-$deleted_part = $delete->rows(3, 3);
+$delete->rows(3, 3);
 // DELETE FROM goods WHERE category = ... ORDER BY id DESC LIMIT 3 OFFSET 3
-$deleted_part = $delete->rows(3, 6);
+$delete->rows(3, 6);
 // DELETE FROM goods WHERE category = ... ORDER BY id DESC LIMIT 3 OFFSET 6
 ```
 
