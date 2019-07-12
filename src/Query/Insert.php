@@ -14,12 +14,51 @@ class Insert extends Query
 	
     /**
 	 * Set or conflict
-	 * @param string $val - ROLLBACK|ABORT|FAIL|IGNORE|REPLACE
 	 * @return Insert
      */
-    public function or($val)
+    public function orRollback()
     {
-		$this->or = ' OR '.mb_strtoupper($val);
+		$this->or = ' OR ROLLBACK';
+		return $this;
+	}
+	
+    /**
+	 * Set or conflict
+	 * @return Insert
+     */
+    public function orAbort()
+    {
+		$this->or = ' OR ABORT';
+		return $this;
+	}
+	
+    /**
+	 * Set or conflict
+	 * @return Insert
+     */
+    public function orFail()
+    {
+		$this->or = ' OR FAIL';
+		return $this;
+	}
+	
+    /**
+	 * Set or conflict
+	 * @return Insert
+     */
+    public function orIgnore()
+    {
+		$this->or = ' OR IGNORE';
+		return $this;
+	}
+	
+    /**
+	 * Set or conflict
+	 * @return Insert
+     */
+    public function orRreplace()
+    {
+		$this->or = ' OR REPLACE';
 		return $this;
 	}
 	

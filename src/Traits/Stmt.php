@@ -18,7 +18,7 @@ trait Stmt
 	 * @param string $short - table name
 	 * @return static
      */
-    public function as($short)
+    public function short($short)
     {
 		$this->short = $short;
 		$this->as[$short] = $this->table->name();

@@ -15,14 +15,17 @@ class Update extends Query
 	
     /**
 	 * Set update values
-	 * @param array $values
+	 * @param mixed $values
 	 * @return Update
      */
-    public function set(array $values)
+    public function set($values)
     {
+		if (!is_array($values)) {
+			$values = [$values];
+		}
 		foreach ($values as $k=>$value) {
 			$stmcol = $this->getColInx($this->columns[$k]);
-			$this->set[]= $this->columns[$k].'='.$stmcol;
+			$this->set[]= $this->columns[$k].' = '.$stmcol;
 			$this->stmt['values'][$stmcol] = [
 				'value' => $value,
 				'column' => $this->columns[$k]
