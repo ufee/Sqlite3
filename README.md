@@ -1,5 +1,5 @@
 ## Sqlite3 PHP Class
-Для полноценной работы требуется Sqlite3, собранный с поддержкой SQLITE_ENABLE_UPDATE_DELETE_LIMIT
+Для полноценной работы требуется Sqlite3, собранный с поддержкой SQLITE_ENABLE_UPDATE_DELETE_LIMIT  
 Протестировано на версии 3.11.0
 
 ## Установка
