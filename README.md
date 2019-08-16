@@ -65,9 +65,15 @@ $db = Sqlite::database($temp_db_path);
 
 $db = Sqlite::database(':memory:');
 ```
-Проверка на существование и создание
+Проверка на существование базы и создание
 ```php
 if (!$db->exists()) {
+	$db->create();
+}
+```
+Или проверка на существование файла (быстрее)
+```php
+if (!$db->fileExists()) {
 	$db->create();
 }
 ```
