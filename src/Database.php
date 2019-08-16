@@ -12,7 +12,7 @@ class Database
 	protected $options = [
 		'flags' => SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE,
 		'encryption_key' => null,
-		'busy_timeout' => 15,
+		'busy_timeout' => 30,
 		'journal_mode' => 'WAL',
 		'synchronous' => 'NORMAL',
 		'exceptions' => true
@@ -58,6 +58,15 @@ class Database
 		} catch (\Throwable $e) {
 			return false;
 		}
+	}
+	
+    /**
+     * Has db file exists
+	 * @return bool
+     */
+    public function fileExists()
+    {
+		return file_exists($this->name);
 	}
 	
     /**
