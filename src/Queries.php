@@ -5,7 +5,7 @@
  */
 namespace Ufee\Sqlite3;
 
-class Queries implements \IteratorAggregate  
+class Queries implements \Countable, \IteratorAggregate
 {
 	protected $items;
 	protected $_callback = false;
@@ -17,6 +17,24 @@ class Queries implements \IteratorAggregate
     public function __construct(Array $elements = [])
     {
         $this->items = $elements;
+	}
+
+    /**
+     * Collection iterator
+	 * @return ArrayIterator
+     */
+	public function getIterator(): \Traversable
+	{
+		return new \ArrayIterator($this->items);
+	}
+	
+    /**
+     * Get count elements
+	 * @return integer
+     */
+    public function count(): int
+    {
+		return count($this->items);
 	}
 	
     /**
@@ -31,24 +49,6 @@ class Queries implements \IteratorAggregate
 		}
 		$this->_callback = $callback;
 		return $this;
-	}
-	
-    /**
-     * Collection iterator
-	 * @return ArrayIterator
-     */
-	public function getIterator()
-	{
-		return new \ArrayIterator($this->items);
-	}
-	
-    /**
-     * Get count elements
-	 * @return integer
-     */
-    public function count()
-    {
-		return count($this->items);
 	}
 	
     /**

@@ -11,7 +11,7 @@ class Database
 	protected $name;
 	protected $options = [
 		'flags' => SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE,
-		'encryption_key' => null,
+		'encryption_key' => '',
 		'busy_timeout' => 30,
 		'journal_mode' => 'WAL',
 		'synchronous' => 'NORMAL',
