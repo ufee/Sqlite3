@@ -7,6 +7,7 @@ namespace Ufee\Sqlite3\Traits;
 
 trait Stmt
 {
+	protected $short;
 	protected $as = [];
 	protected $stmt = [
 		'values' => [],
