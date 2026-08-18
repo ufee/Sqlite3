@@ -11,7 +11,6 @@ class Select extends Query
 {
 	use Traits\Conditions;
 	
-	protected $short;
 	protected $distinct;
 	protected $join = [];
 	protected $having = [];
