@@ -98,7 +98,7 @@ class Select extends Query
 	 * @param string $operator
 	 * @return Select
      */
-    public function orHaving($column, $value = null, $operator = '=')
+    public function orHaving($column, $value = false, $operator = '=')
     {
 		return $this->condition($column, $value, $operator, 'OR', 'having');
 	}
@@ -161,7 +161,7 @@ class Select extends Query
 		$stmt = $db->prepare($this->sql);
 		
 		foreach ($this->stmt['values'] as $stcol=>$data) {
-			$stmt->bindValue($stcol, $data['value'], $this->getColType($data['column'], $data['value']));
+			$stmt->bindValue($stcol, $data['value'], $this->getColType($data['column'], $data['value'], $data['clause']));
 		}
 		$this->result = $stmt->execute();
 		$this->execution_time = number_format(microtime(true)-$started, 12);

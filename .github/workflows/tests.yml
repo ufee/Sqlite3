@@ -1,0 +1,25 @@
+name: Tests
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  phpunit:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        service: [php74, php80, php82, php84]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image
+        run: docker compose build ${{ matrix.service }}
+
+      - name: Install dependencies
+        run: docker compose run --rm -T --user "$(id -u):$(id -g)" -e COMPOSER_HOME=/tmp/composer composer install --no-interaction --no-progress --prefer-dist
+
+      - name: Run tests
+        run: docker compose run --rm -T ${{ matrix.service }} vendor/bin/phpunit

@@ -68,7 +68,7 @@ class Table
 			}
 		}
 		if (!is_null($name)) {
-			if (!array_key_exists($name, $this->columns)) {
+			if (!is_array($this->columns) || !array_key_exists($name, $this->columns)) {
 				return null;
 			}
 			return $this->columns[$name];
@@ -96,30 +96,47 @@ class Table
      * Get stmt type of column
 	 * @param string $name
 	 * @param mixed $value
+	 * @param bool $infer - type by value for unknown column (aliases, expressions)
 	 * @return integer
      */
-    public function getColumnType($name, $value)
+    public function getColumnType($name, $value, $infer = false)
     {
 		if (!isset($this->column_types[$name])) {
 			if (!$column = $this->columns($name)) {
+				if ($infer) {
+					return static::getValueType($value);
+				}
 				throw new \Exception('Column "'.$name.'" not found in table "'.$this->name);
 			}
-			if (!$type = mb_strtoupper($column['type'])) {
-				if (is_null($value)) {
-					$type = 'NULL';
-				} else if (is_float($value)) {
-					$type = 'REAL';
-				} else if (is_int($value)) {
-					$type = 'INTEGER';
-				}
-			}
-			if (array_key_exists($type, static::STMT_TYPES)) {
+			$type = mb_strtoupper($column['type']);
+			if (!$type) {
+				$this->column_types[$name] = static::getValueType($value);
+			} else if (array_key_exists($type, static::STMT_TYPES)) {
 				$this->column_types[$name] = static::STMT_TYPES[$type];
 			} else {
 				$this->column_types[$name] = static::STMT_TYPES['TEXT'];
 			}
 		}
 		return $this->column_types[$name];
+	}
+	
+    /**
+     * Get stmt type by value
+	 * @param mixed $value
+	 * @return integer
+     */
+    public static function getValueType($value)
+    {
+		if (is_null($value)) {
+			return static::STMT_TYPES['NULL'];
+		}
+		if (is_float($value)) {
+			return static::STMT_TYPES['REAL'];
+		}
+		if (is_int($value)) {
+			return static::STMT_TYPES['INTEGER'];
+		}
+		return static::STMT_TYPES['TEXT'];
 	}
 	
     /**

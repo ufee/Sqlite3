@@ -1,0 +1,32 @@
+x-php: &php
+  volumes:
+    - .:/app
+  working_dir: /app
+  environment:
+    REQUIRE_UPDATE_DELETE_LIMIT: "1"
+
+services:
+  # dependencies are installed once for all PHP versions (config.platform.php = 7.4)
+  composer:
+    image: composer:2
+    volumes:
+      - .:/app
+    working_dir: /app
+    profiles: [tools]
+
+  php74:
+    <<: *php
+    image: ufee-sqlite3:php7.4
+    build: { context: docker, args: { PHP_VERSION: "7.4" } }
+  php80:
+    <<: *php
+    image: ufee-sqlite3:php8.0
+    build: { context: docker, args: { PHP_VERSION: "8.0" } }
+  php82:
+    <<: *php
+    image: ufee-sqlite3:php8.2
+    build: { context: docker, args: { PHP_VERSION: "8.2" } }
+  php84:
+    <<: *php
+    image: ufee-sqlite3:php8.4
+    build: { context: docker, args: { PHP_VERSION: "8.4" } }

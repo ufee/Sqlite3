@@ -65,7 +65,7 @@ class Insert extends Query
     /**
 	 * Insert rows
 	 * @param array $rows
-	 * @return bool
+	 * @return integer inserted rows
      */
     public function rows(array $rows)
     {
@@ -106,7 +106,7 @@ class Insert extends Query
 		$stmt->reset();
 		$this->stmt['index'] = [];
 		$this->result->finalize();
-		return $db->connection()->changes() === count($rows);
+		return $db->connection()->changes();
 	}
 	
    /**

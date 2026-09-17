@@ -91,7 +91,8 @@ $result = $db->single($query, $entire = true); // return array
 $result = $db->exec($command); // return bool
 $result = $db->pragma($key, $val); // return bool
 ```
-Закрытие соединения с БД
+Закрытие соединения с БД  
+При следующем запросе соединение будет открыто автоматически
 ```php
 $db->close();
 ```
@@ -177,10 +178,15 @@ $insert = $table->insert('id, category, data')
 	->orFail()
 	->orIgnore()
 	->orRreplace();
-$insert->rows(array $rows); // return bool
+$insert->rows(array $rows); // return integer inserted rows
 // or
-$insert->row(array $row); // return bool|integer
+$insert->row(array $row); // return integer inserted id|bool
 ```
+`rows()` возвращает количество вставленных строк, `row()` - id вставленной строки (`true`, если id недоступен).  
+При нарушении ограничений (UNIQUE, NOT NULL и т.п.) выбрасывается исключение, кроме случаев:
+- `orIgnore()` - такие строки пропускаются: `rows()` вернет количество фактически вставленных строк, `row()` - `false`
+- `orRreplace()` - существующая строка заменяется новой
+
 Вставка одной строки
 ```php
 $insert = $goods->insert('category, price, title');
@@ -230,6 +236,18 @@ $result = $insert->rows([
 	[4, 'TV 3000']
 ]);
 // INSERT INTO goods (category, title) VALUES (..., ...), (..., ...), (..., ...)
+// $result = 3
+```
+Вставка с пропуском дубликатов
+```php
+$meta->insert(['good_id' => 1]);
+
+$inserted = $meta->insert('good_id')->orIgnore()->rows([[1], [2], [3]]);
+// INSERT OR IGNORE INTO goods_meta (good_id) VALUES (...), (...), (...)
+// $inserted = 2, строка с good_id = 1 уже существует
+
+$result = $meta->insert('good_id')->orIgnore()->row([1]);
+// $result = false
 ```
 
 ## Запрос Select
@@ -255,6 +273,14 @@ $rows = $select->rows($limit = null, $offset = null); // return array
 ```php
 $select->where('id != another OR ...')
 $select->having('other > another AND ...')
+```
+Условие HAVING по псевдониму выражения  
+Тип значения для псевдонима определяется по типу PHP-значения, поэтому числа передаются как `int`/`float`, а не строкой
+```php
+$select = $goods->select('category, COUNT(*) AS cnt')
+	->groupBy('category')
+	->having('cnt', 2, '>=');
+// SELECT category,COUNT(*) AS cnt FROM goods GROUP BY category HAVING cnt >= ...
 ```
 Получение количества строк
 ```php
@@ -289,7 +315,9 @@ $select = $goods->select('title')->where('id', 1);
 $title = $select->row('title');
 // SELECT * FROM goods WHERE id = ... LIMIT 1
 ```
-Получение с использованием JOIN
+Получение с использованием JOIN  
+При JOIN основная таблица получает псевдоним: задается через `short()`, по умолчанию - первая буква имени таблицы (`goods AS g`).  
+Рекомендуется указывать `short()` явно, а колонки в условиях - с псевдонимом таблицы (`g.category`, `m.star`), чтобы избежать неоднозначности имен.
 ```php
 $select = $goods->select('g.id, g.category, g.title, m.descr, m.sale, g.hot, m.star, g.created_at')
 	->short('g')->innerJoin('goods_meta AS m', 'm.good_id=g.id')
@@ -388,4 +416,45 @@ $insert->row([5, 'PC Intel']);
 // INSERT INTO goods (category, title) VALUES (..., ...)
 $goods->database()->transactionCommit();
 // COMMIT TRANSACTION
+```
+
+## Тестирование
+Тесты на PHPUnit 9.6 (`tests/`) фиксируют текущее поведение библиотеки: возвращаемые значения, генерируемый SQL и состояние БД.  
+Тесты `row()` и `rows($limit, $offset)` для Update и Delete требуют SQLite, собранного с `SQLITE_ENABLE_UPDATE_DELETE_LIMIT`.
+
+### Без Docker
+Требуется PHP 7.4 - 8.4 с расширениями `sqlite3` и `mbstring`
+```
+composer install
+vendor/bin/phpunit
+```
+Если системный SQLite собран без `SQLITE_ENABLE_UPDATE_DELETE_LIMIT`, тесты с LIMIT будут пропущены (skipped).
+
+### В Docker
+Образы PHP 7.4, 8.0, 8.2, 8.4 с SQLite, собранным с `SQLITE_ENABLE_UPDATE_DELETE_LIMIT`. Тесты с LIMIT здесь обязательны и не пропускаются.
+```
+docker compose build
+docker compose run --rm composer install
+docker/test-all.sh
+```
+Запуск на одной версии PHP без скрипта (сервисы: `php74`, `php80`, `php82`, `php84`)
+```
+docker compose run --rm php84 vendor/bin/phpunit
+docker compose run --rm php82 vendor/bin/phpunit tests/Query/InsertTest.php
+docker compose run --rm php74 vendor/bin/phpunit --filter testWhereOperators
+```
+Запуск на отдельных версиях и выборочных тестах через скрипт (аргументы передаются в phpunit)
+```
+PHP_SERVICES="php74 php84" docker/test-all.sh --filter SelectTest
+```
+
+#### Windows
+PowerShell
+```
+& "C:\Program Files\Git\bin\bash.exe" docker/test-all.sh
+& "C:\Program Files\Git\bin\bash.exe" -c 'PHP_SERVICES="php74 php84" docker/test-all.sh --filter SelectTest'
+```
+Git Bash
+```
+bash docker/test-all.sh
 ```

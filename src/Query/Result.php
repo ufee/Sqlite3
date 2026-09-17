@@ -41,7 +41,7 @@ class Result
     public function getRows($mode = SQLITE3_ASSOC)
     {
 		$rows = [];
-		while ($row = $this->_resource->fetchArray(SQLITE3_ASSOC)) {
+		while ($row = $this->_resource->fetchArray($mode)) {
 			$rows[]= $row;
 		}
 		return $rows;

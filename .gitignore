@@ -1,1 +1,25 @@
-/.vscode
+# Composer
+/vendor/
+composer.lock
+
+# PHPUnit
+/phpunit.xml
+.phpunit.result.cache
+.phpunit.cache/
+
+# Docker: local overrides
+/docker-compose.override.yml
+
+# Claude Code
+/.claude/
+/CLAUDE.md
+/CLAUDE.local.md
+
+# IDE
+/.vscode/
+/.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
