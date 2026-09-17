@@ -89,7 +89,10 @@ class Database
 			}
 			@chmod($dir, 0775);
 		}
-		return file_put_contents($dir.$file, '');
+		if (file_put_contents($dir.$file, '') === false) {
+			throw new \Exception('Sqlite database create error: unable to create file: '.$dir.$file);
+		}
+		return true;
 	}
 	
     /**
@@ -300,7 +303,8 @@ class Database
     public function close()
     {
 		if ($this->hasOpened()) {
-			$this->connection()->close();
+			$this->_db->close();
+			$this->_db = null;
 		}
 	}
 	

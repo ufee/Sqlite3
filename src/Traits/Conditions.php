@@ -66,7 +66,8 @@ trait Conditions
 			$sql = $column.' '.$operator." ".$stmcol;
 			$this->stmt['values'][$stmcol] = [
 				'value' => $value,
-				'column' => $column
+				'column' => $column,
+				'clause' => $type
 			];
 		} elseif (in_array($operator, ['BETWEEN', 'NOT BETWEEN'])) {
 			$stmcol1 = $this->getColInx($column);
@@ -74,11 +75,13 @@ trait Conditions
 			$sql = $column.' '.$operator.' '.$stmcol1.' AND '.$stmcol2;
 			$this->stmt['values'][$stmcol1] = [
 				'value' => $value[0],
-				'column' => $column
+				'column' => $column,
+				'clause' => $type
 			];
 			$this->stmt['values'][$stmcol2] = [
 				'value' => $value[1],
-				'column' => $column
+				'column' => $column,
+				'clause' => $type
 			];
 		} elseif (in_array($operator, ['IN', 'NOT IN'])) {
 			$ins = [];
@@ -87,7 +90,8 @@ trait Conditions
 				$ins[]= $stmcol;
 				$this->stmt['values'][$stmcol] = [
 					'value' => $in_val,
-					'column' => $column
+					'column' => $column,
+					'clause' => $type
 				];
 			}
 			$sql = $column.' '.$operator.' ('.join(',', $ins).')';
@@ -98,7 +102,8 @@ trait Conditions
 			$sql = $column.' '.$operator.' '.$stmcol;
 			$this->stmt['values'][$stmcol] = [
 				'value' => $value,
-				'column' => $column
+				'column' => $column,
+				'clause' => $type
 			];
 		} else {
 			throw new \Exception('Invalid '.$type.' operator: '.$operator.' for column: '.$column);

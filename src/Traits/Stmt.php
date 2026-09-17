@@ -46,7 +46,7 @@ trait Stmt
 	 * @param mixed $value
 	 * @return integer
      */
-    protected function getColType($column, $value)
+    protected function getColType($column, $value, $clause = null)
     {
 		$table = $this->table;
 		if (strpos($column, '.') !== false) {
@@ -55,9 +55,12 @@ trait Stmt
 			$table_name = $parts[0];
 			if (array_key_exists($table_name, $this->as)) {
 				$table_name = $this->as[$table_name];
+			} elseif ($table_name === $this->short) {
+				$table_name = $this->table->name();
 			}
 			$table = $table->database()->table($table_name);
 		}
-		return $table->getColumnType($column, $value);
+		// HAVING may use aliases and aggregates of SELECT, not only table columns
+		return $table->getColumnType($column, $value, $clause === 'having');
 	}
 }
